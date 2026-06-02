@@ -1,0 +1,4 @@
+@import "tailwindcss" prefix(product);
+@import "@mfe/config/tailwind/theme";
+
+@source "./**/*.{tsx,ts}";
