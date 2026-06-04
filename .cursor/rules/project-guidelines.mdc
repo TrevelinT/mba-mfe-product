@@ -1,0 +1,183 @@
+---
+description: mfe-product repository guidelines
+alwaysApply: true
+---
+
+# Project guidelines (`mfe-product`)
+
+## Node version (nvm)
+
+This repo pins Node in [`.nvmrc`](.nvmrc) and `package.json` `engines` (currently **24.15.0**).
+
+Before any Node/npm command (`npm`, `npx`, `node`, `vite`, etc.), from **this repo root**:
+
+1. Source nvm, activate the pinned version, then **prepend nvm's Node to `PATH`** (Cursor's agent shell can override `nvm use`):
+
+   ```sh
+   source ~/.nvm/nvm.sh
+   nvm use
+   export PATH="$HOME/.nvm/versions/node/v$(cat .nvmrc)/bin:$PATH"
+   ```
+
+2. Prefer one chained command (example with checks):
+
+   ```sh
+   source ~/.nvm/nvm.sh && nvm use && export PATH="$HOME/.nvm/versions/node/v$(cat .nvmrc)/bin:$PATH" && npm run format-and-lint && npm run test
+   ```
+
+3. If `nvm use` fails because the version is not installed, run `nvm install`, then retry.
+
+Do not assume the system default Node is correct — verify with `node -v` when troubleshooting engine or Vite errors.
+
+## Boundaries in the MFE polyrepo
+
+**Purpose:** Product details remote in the four-repo polyrepo. Integrates with shell, buy-box, and cart **without** cross-repo imports.
+
+**Owns:**
+
+- Product page data shape and mock API (`getProductPage`)
+- Loading skeleton and presentational view
+- Package styles ([`src/styles.css`](src/styles.css), imported from the container)
+
+**Does not own:**
+
+- Price, installments, or add-to-cart (buy-box remote)
+- Cart state (cart remote)
+- Host layout (shell remote)
+
+**Principles:**
+
+- **No imports** from buy-box or cart (separate git repos / federation remotes).
+- **Shell is host only** — loads `product/Product` via Module Federation; does not pass fetched data into this remote.
+- **`PRODUCT_ID`** (`nintendo-switch-2` in [`src/api/product.ts`](src/api/product.ts)) must stay aligned with buy-box offer id and cart catalog id across repos.
+- **Does not** publish or subscribe to `cart:add-item` (buy-box → cart on `document`).
+
+**Do not:**
+
+- Import buy-box or cart source from this repo.
+- Add shared integration packages without an explicit repo decision.
+
+## Module Federation
+
+Configured in [`vite.config.ts`](vite.config.ts):
+
+| Setting | Value |
+|---------|--------|
+| Remote name | `product` |
+| Dev/preview port | **5001** |
+| Expose | `./Product` → [`src/components/product-container.tsx`](src/components/product-container.tsx) |
+
+- Shell consumes **`product/Product`** (default export from the container).
+- This repo does not declare federation remotes.
+- Container imports [`src/styles.css`](src/styles.css) so styles ship with the remote.
+- After **CSS or federation build** changes: `npm run build && npm run preview`. Rebuild when changing [`vite-federation-css-fix.ts`](vite-federation-css-fix.ts).
+
+**Standalone dev:** [`src/main.tsx`](src/main.tsx) + `index.html` on port 5001 (`npm run dev`).
+
+## Async data fetching (product)
+
+**Purpose:** Simulate a backend fetch on mount. Shell mounts the federated `<Product />` only — it does not orchestrate loading or pass data into this remote.
+
+- **API:** `getProductPage(options?: GetProductPageOptions): Promise<ProductPage>` — options object (not positional args); default `latencyMs: 300`. Exported via `productAPI` from [`src/api/product.ts`](src/api/product.ts).
+- **Hook (internal):** `useProductPage()` → `{ page, isLoading }` where `page` is `null` until resolved. `useState` + `useEffect` with a cancelled flag for Strict Mode. Swap point for React Query / SWR later.
+- **Container:** [`product-container.tsx`](src/components/product-container.tsx) calls the hook only — no fetch logic in the container.
+- **Loading UI:** internal `ProductViewSkeleton`; loaded → `ProductView`.
+- **Tests:** pass `{ latencyMs: 0 }` to skip simulated delay.
+
+| API | Options / return | Hook | Container | Skeleton | View |
+|-----|------------------|------|-----------|----------|------|
+| `getProductPage` | `GetProductPageOptions` → `ProductPage` | `useProductPage` → `{ page, isLoading }` | `ProductContainer` | `ProductViewSkeleton` | `ProductView` |
+
+**Files:** [`src/api/product.ts`](src/api/product.ts), [`src/components/use-product-page.ts`](src/components/use-product-page.ts), [`src/components/product-container.tsx`](src/components/product-container.tsx), [`src/components/product-view-skeleton.tsx`](src/components/product-view-skeleton.tsx), [`src/components/product-view.tsx`](src/components/product-view.tsx).
+
+**When changing:** update `src/api/*`, hook/container/skeleton, tests, and this section.
+
+**Do not:**
+
+- Fetch product data in the shell repo for this feature.
+- Export hooks or skeletons from [`src/index.ts`](src/index.ts).
+- Add positional args to `getProductPage`.
+
+```mermaid
+sequenceDiagram
+  participant Container as ProductContainer
+  participant Hook as useProductPage
+  participant API as getProductPage
+  participant Skeleton as ProductViewSkeleton
+  participant View as ProductView
+  Container->>Hook: useProductPage
+  Hook->>Skeleton: page is null
+  Hook->>API: await on mount
+  Note over API: simulated delay default 300ms
+  API-->>Hook: ProductPage
+  Hook-->>Container: page
+  Container->>View: props
+```
+
+## Public API and internal imports
+
+**Federation entry:** shell loads `./Product` (container) — not deep paths under `src/`.
+
+**[`src/index.ts`](src/index.ts):** exports `Product` (`ProductContainer`) and `productAPI` for tests/tooling. Do not export hooks, skeletons, or views.
+
+**Container/view split:** export container as `Product`; view components stay internal.
+
+**Package-internal tests** may import directly from source files (e.g. `./product-view`, `../api/product`) — not bound by `index.ts`.
+
+| From | Import via | Example |
+|------|------------|---------|
+| `src/components/*` | [`src/api/index.ts`](src/api/index.ts) (`../api`) | `import type { ProductPage } from "../api"` |
+| `src/components/*` (container → view) | Sibling (`./product-view`) | **not** `./index` or `../components` |
+| `src/api/*` | Sibling modules (`./product`, …) | Avoid `from "./index"` inside `api/` (circular barrel) |
+
+- **Do not** import from [`src/index.ts`](src/index.ts) inside this repo (entry loads container → cycle).
+- **Do not** import views through [`src/components/index.ts`](src/components/index.ts) from a container: barrel exports container → `from "./index"` cycles.
+- Re-export new API symbols from `src/api/index.ts` so components can use `../api`.
+
+| Export | Namespace | Key symbols |
+|--------|-----------|-------------|
+| `Product` (`ProductContainer`) | `productAPI` | `getProductPage`, `GetProductPageOptions`, `PRODUCT_ID`, `ProductPage`, … |
+
+When adding a new public symbol, update `src/index.ts` and tests.
+
+## TypeScript interfaces
+
+- **Component props:** use `interface`, not `type`, named `{ComponentName}Props` (e.g. `ProductViewProps`).
+- **Export:** export the props interface when tests or callers need it; keep internal-only props unexported.
+- **API / domain shapes:** prefer `interface` for plain objects (`ProductPhoto`, `ProductReviews`); use `type` only for unions, intersections, or mapped types.
+- **Optional fields:** use `?` (e.g. `badge?: string`); omit the DOM node when absent.
+- **Reference:** [`src/components/product-view.tsx`](src/components/product-view.tsx).
+
+## Done means green
+
+Do not treat a coding task as finished until **lint/format**, **unit tests**, and (when applicable) **build/type-check** pass from **this repo root** (after nvm setup above).
+
+### Lint and format
+
+1. Run `npm run format-and-lint` (Biome).
+2. If it fails, fix manually or run `npm run format-and-lint:fix`, then re-run until green.
+3. Do not skip violations unless the user explicitly asks.
+
+### Unit tests
+
+1. Run `npm run test` (or `npm run test-coverage` to mirror [CI](.github/workflows/ci.yml)).
+2. Fix failing tests; re-run until green.
+
+### Build and type-check
+
+When touching types, Vite config, federation, or CSS workaround:
+
+1. `npm run type-check`
+2. `npm run build`
+
+### E2E (shell repo only)
+
+This repo does **not** run Playwright. When UI/behavior affects the integrated page, coordinate with the **shell** remote (E2E checks out built remotes). Skip for docs-only edits here.
+
+### When to run
+
+- After substantive code changes, before summarizing completion.
+- **Feature work:** `format-and-lint` → `test` → `type-check` / `build` when relevant.
+- Docs-only: run checks when unsure; otherwise note why skipped.
+
+If a command fails, fix the root cause and re-run before finishing.

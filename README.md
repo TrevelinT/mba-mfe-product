@@ -27,3 +27,7 @@ Exposes `./Product` → `src/components/product-container.tsx` as `product/Produ
 ## CI
 
 Push/PR to `main` runs lint, build, type-check, and `test-coverage`.
+
+## Contributor guidelines
+
+Agent and contributor conventions: [`.cursor/rules/project-guidelines.mdc`](.cursor/rules/project-guidelines.mdc).
