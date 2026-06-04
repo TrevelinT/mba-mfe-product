@@ -55,11 +55,11 @@ function patchRemoteEntry(code: string, cssPaths: string[]): string {
 	const cssArrayLiteral = JSON.stringify(cssPaths);
 
 	code = code.replace(/`__v__css__[^`]*`/g, cssArrayLiteral);
+	code = code.replace(/a\(`__v__css__[^`]+`,/g, `a(${cssArrayLiteral},`);
 	code = code.replace(
-		/a\(`__v__css__[^`]+`,/g,
-		`a(${cssArrayLiteral},`,
+		/a\(\[\],!1,(`\.\/[^`]+`)\)/g,
+		`a(${cssArrayLiteral},!1,$1)`,
 	);
-	code = code.replace(/a\(\[\],!1,(`\.\/[^`]+`)\)/g, `a(${cssArrayLiteral},!1,$1)`);
 
 	return code;
 }

@@ -71,7 +71,10 @@ describe("ImageCarousel", () => {
 		const frontThumbnail = screen.getByRole("button", {
 			name: thumbnailButtonName(PHOTOS[0]),
 		});
-		expect(frontThumbnail).toHaveClass("product:border-primary", "product:border-2");
+		expect(frontThumbnail).toHaveClass(
+			"product:border-primary",
+			"product:border-2",
+		);
 		expect(frontThumbnail).toHaveAttribute("aria-current", "true");
 	});
 
@@ -88,7 +91,10 @@ describe("ImageCarousel", () => {
 			name: PHOTOS[1].alt,
 		});
 		expect(mainImage).toHaveAttribute("src", PHOTOS[1].src);
-		expect(sideThumbnail).toHaveClass("product:border-primary", "product:border-2");
+		expect(sideThumbnail).toHaveClass(
+			"product:border-primary",
+			"product:border-2",
+		);
 		expect(sideThumbnail).toHaveAttribute("aria-current", "true");
 
 		const frontThumbnail = screen.getByRole("button", {
