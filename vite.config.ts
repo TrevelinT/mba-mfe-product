@@ -5,6 +5,7 @@ import { defineConfig } from "vite";
 import { fixFederationCssForVite8 } from "./vite-federation-css-fix";
 
 export default defineConfig({
+	base: process.env.VITE_BASE ?? "/",
 	plugins: [
 		react(),
 		tailwindcss(),

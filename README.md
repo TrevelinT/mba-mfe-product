@@ -26,7 +26,19 @@ Exposes `./Product` → `src/components/product-container.tsx` as `product/Produ
 
 ## CI
 
-Push/PR to `main` runs lint, build, type-check, and `test-coverage`.
+Push/PR to `main` runs lint, build, type-check, and `test-coverage`. Production builds set `VITE_BASE=/mba-mfe-product/` so artifacts work on GitHub Pages.
+
+## Deploy (GitHub Pages)
+
+One-time setup in the repository **Settings → Pages**: set **Source** to **GitHub Actions** (not “Deploy from a branch”). Confirm the `github-pages` environment exists.
+
+The federation remote is published from CI artifacts (no rebuild in deploy):
+
+1. Wait for a successful **CI** run on `main`.
+2. **Manual:** run **Deploy to GitHub Pages** (`workflow_dispatch`) and enter that run’s numeric **Run ID**.
+3. **Tag:** push a `v*` tag (e.g. `v1.0.0`) on a commit that already has a successful CI run; deploy resolves the latest CI run for that commit.
+
+Site URL: `https://trevelint.github.io/mba-mfe-product/`. Point the shell product remote at the deployed `remoteEntry.js` path under that base (verify after first deploy).
 
 ## Contributor guidelines
 
