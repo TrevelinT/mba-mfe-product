@@ -49,11 +49,16 @@ jobs:
         run: node scripts/report-build-artifacts.mjs
 
       - name: Upload build artifacts
+        id: upload-dist
         uses: actions/upload-artifact@v7
         with:
           name: product-dist
           path: dist/
           if-no-files-found: error
+
+      - name: Report artifact ID for deploy
+        run: |
+          echo "Deploy input **artifact_id**: \`${{ steps.upload-dist.outputs.artifact-id }}\`" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Type check
         run: npm run type-check
