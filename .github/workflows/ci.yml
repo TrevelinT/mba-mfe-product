@@ -9,6 +9,7 @@ on:
 permissions:
   contents: read
   packages: read
+  actions: write
 
 jobs:
   build:
@@ -41,6 +42,16 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Report build artifacts
+        run: node scripts/report-build-artifacts.mjs
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: product-dist
+          path: dist/
+          if-no-files-found: error
 
       - name: Type check
         run: npm run type-check

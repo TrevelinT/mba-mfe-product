@@ -16,7 +16,8 @@
 		"format-and-lint:fix": "biome check . --write",
 		"test": "vitest run",
 		"test:watch": "vitest",
-		"test-coverage": "vitest run --coverage"
+		"test-coverage": "vitest run --coverage",
+		"report-build-artifacts": "node scripts/report-build-artifacts.mjs"
 	},
 	"dependencies": {
 		"@trevelint/mfe-config": "0.0.1",
