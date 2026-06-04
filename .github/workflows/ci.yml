@@ -58,7 +58,18 @@ jobs:
 
       - name: Report artifact ID for deploy
         run: |
-          echo "Deploy input **artifact_id**: \`${{ steps.upload-dist.outputs.artifact-id }}\`" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## Deploy to GitHub Pages"
+            echo ""
+            echo "Copy **artifact_id** into the Deploy workflow (not the workflow run ID from the page URL)."
+            echo ""
+            echo "| Field | Value |"
+            echo "|-------|-------|"
+            echo "| **artifact_id** | \`${{ steps.upload-dist.outputs.artifact-id }}\` |"
+            echo "| **artifact_url** | [open artifact](${{ steps.upload-dist.outputs.artifact-url }}) |"
+            echo ""
+            echo "Do **not** use the number in \`/actions/runs/<id>/\` — that is the CI **run** ID. Use the ID above or the segment after \`/artifacts/\` in the artifact URL."
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Type check
         run: npm run type-check

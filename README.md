@@ -35,8 +35,8 @@ One-time setup in the repository **Settings → Pages**: set **Source** to **Git
 The federation remote is published from CI artifacts (no rebuild in deploy):
 
 1. Wait for a successful **CI** run on `main`.
-2. **Manual:** copy the numeric **artifact_id** for `product-dist` from the CI job summary (or the run’s Artifacts list), then run **Deploy to GitHub Pages** (`workflow_dispatch`) and paste it.
-3. **Tag:** push a `v*` tag (e.g. `v1.0.0`) on a commit that already has a successful CI run; deploy resolves the `product-dist` artifact for that commit.
+2. **Manual:** copy **artifact_id** from the CI job summary (and use the artifact link there if helpful). Run **Deploy to GitHub Pages** (`workflow_dispatch`) and paste that ID. Use the number after `/artifacts/` in the artifact URL—not the run ID after `/actions/runs/` in the browser address bar. Deploy resolves the owning CI run internally.
+3. **Tag:** push a `v*` tag (e.g. `v1.0.0`) on a commit that already has a successful CI run on `main`; deploy resolves the `product-dist` artifact for that commit.
 
 Site URL: `https://trevelint.github.io/mba-mfe-product/`. Point the shell product remote at the deployed `remoteEntry.js` path under that base (verify after first deploy).
 
