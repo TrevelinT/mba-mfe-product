@@ -2,8 +2,11 @@ export const PRODUCT_ID = "nintendo-switch-2";
 
 export interface ProductPhoto {
 	src: string;
+	thumbSrc: string;
 	alt: string;
 	label: string;
+	width: number;
+	height: number;
 }
 
 export interface ProductReviews {
@@ -26,25 +29,37 @@ export interface GetProductPageOptions {
 
 const PRODUCT_PHOTOS: ProductPhoto[] = [
 	{
-		src: "https://cdn.awsli.com.br/600x450/2443/2443989/produto/366571198/63388ed8cf5558ee164d38ad715b2266-5oolcqzk74.jpg",
+		src: `${import.meta.env.BASE_URL}images/nintendo-switch-2-image-01.webp`,
+		thumbSrc: `${import.meta.env.BASE_URL}images/nintendo-switch-2-image-01-thumb.webp`,
 		alt: "Bundle Nintendo Switch 2 com Mario Kart World",
 		label: "Bundle Nintendo Switch 2 com Mario Kart World",
+		width: 450,
+		height: 450,
 	},
 	{
-		src: "https://infostore.vtexassets.com/arquivos/ids/267231/console_nintendo_switch_2_05.jpg?v=638865606321730000",
+		src: `${import.meta.env.BASE_URL}images/nintendo-switch-2-image-02.webp`,
+		thumbSrc: `${import.meta.env.BASE_URL}images/nintendo-switch-2-image-02-thumb.webp`,
 		alt: "Jogador com o Nintendo Switch 2 na mão",
 		label: "Jogador com o Nintendo Switch 2 na mão",
+		width: 800,
+		height: 800,
 	},
 	{
-		src: "https://www.adrenaline.com.br/wp-content/uploads/2024/12/nintendo-switch-2-reddit-vazamento-02.jpg",
+		src: `${import.meta.env.BASE_URL}images/nintendo-switch-2-image-03.webp`,
+		thumbSrc: `${import.meta.env.BASE_URL}images/nintendo-switch-2-image-03-thumb.webp`,
 		alt: "Comparação de tamanho entre o Nintendo Switch 2 e o Nintendo Switch (rumor)",
 		label:
 			"Comparação de tamanho entre o Nintendo Switch 2 e o Nintendo Switch (rumor)",
+		width: 900,
+		height: 755,
 	},
 	{
-		src: "https://api.store.vivo.com.br/medias/515Wx515H-22024615-Nintendo-Switch-2-com-Mario-Kart-World-10-.jpg?context=bWFzdGVyfHByb2R1Y3RpbWFnZXN8Mjg2NDV8aW1hZ2UvanBlZ3xhR1JqTDJoaFlpODVOemN5TVRReU9UZzFNalEyTHpVeE5WZDROVEUxU0Y4eU1qQXlORFl4TlY5T2FXNTBaVzVrYnkxVGQybDBZMmd0TWkxamIyMHRUV0Z5YVc4dFMyRnlkQzFYYjNKc1pGOGdLREV3S1M1cWNHY3w5ZGNkZGE5OTI3MTczZDNhNDVjYTNiNWQwNGU1ZTkxNDEzNDlhYTg4NDBmYmU0ZDM2YTczZmE4Zjc5MWEyYzJk",
+		src: `${import.meta.env.BASE_URL}images/nintendo-switch-2-image-04.webp`,
+		thumbSrc: `${import.meta.env.BASE_URL}images/nintendo-switch-2-image-04-thumb.webp`,
 		alt: "Nintendo Switch 2 com joy-con vermelho e azul destacados",
 		label: "Nintendo Switch 2 com joy-con vermelho e azul destacados",
+		width: 515,
+		height: 515,
 	},
 ];
 

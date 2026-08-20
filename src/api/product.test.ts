@@ -13,9 +13,12 @@ describe("product API", () => {
 		expect(page.description.length).toBeGreaterThan(0);
 		expect(page.photos).toHaveLength(4);
 		expect(page.photos[0]).toMatchObject({
-			src: expect.stringMatching(/^https:\/\//),
+			src: expect.any(String),
+			thumbSrc: expect.any(String),
 			alt: expect.any(String),
 			label: expect.any(String),
+			width: expect.any(Number),
+			height: expect.any(Number),
 		});
 		expect(page.reviews).toEqual({ rating: 4.5, count: 2451 });
 		expect(page.badge).toBe("Mais Vendido");

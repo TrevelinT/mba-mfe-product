@@ -30,6 +30,44 @@ function buildStarSlots(rating: number): StarSlot[] {
 	return slots;
 }
 
+function StarIcon({ filled }: { filled: boolean }) {
+	return (
+		<svg
+			aria-hidden="true"
+			className="product:size-6"
+			fill={filled ? "currentColor" : "none"}
+			stroke="currentColor"
+			strokeWidth={filled ? 0 : 1.5}
+			viewBox="0 0 24 24"
+		>
+			<path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+		</svg>
+	);
+}
+
+function StarHalfIcon() {
+	return (
+		<svg aria-hidden="true" className="product:size-6" viewBox="0 0 24 24">
+			<defs>
+				<clipPath id="star-half-clip">
+					<rect height="24" width="12" x="0" y="0" />
+				</clipPath>
+			</defs>
+			<path
+				d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+				fill="none"
+				stroke="currentColor"
+				strokeWidth={1.5}
+			/>
+			<path
+				clipPath="url(#star-half-clip)"
+				d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+				fill="currentColor"
+			/>
+		</svg>
+	);
+}
+
 function StarRating({ rating }: { rating: number }) {
 	const starSlots = buildStarSlots(rating);
 
@@ -41,29 +79,10 @@ function StarRating({ rating }: { rating: number }) {
 		>
 			{starSlots.map(function renderStar(slot) {
 				if (slot.kind === "half") {
-					return (
-						<span
-							aria-hidden="true"
-							className="material-symbols-outlined"
-							key={slot.id}
-							style={{ fontVariationSettings: "'FILL' 1" }}
-						>
-							star_half
-						</span>
-					);
+					return <StarHalfIcon key={slot.id} />;
 				}
 
-				const isFull = slot.kind === "full";
-				return (
-					<span
-						aria-hidden="true"
-						className="material-symbols-outlined"
-						key={slot.id}
-						style={isFull ? { fontVariationSettings: "'FILL' 1" } : undefined}
-					>
-						star
-					</span>
-				);
+				return <StarIcon filled={slot.kind === "full"} key={slot.id} />;
 			})}
 		</div>
 	);

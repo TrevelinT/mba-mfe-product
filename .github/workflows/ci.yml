@@ -5,6 +5,7 @@ on:
     branches: [main]
   pull_request:
     types: [opened, synchronize]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -19,13 +20,13 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 2
           persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version-file: package.json
           cache: npm
@@ -49,30 +50,54 @@ jobs:
         run: node scripts/report-build-artifacts.mjs
 
       - name: Upload build artifacts
-        id: upload-dist
         uses: actions/upload-artifact@v7
         with:
           name: product-dist
           path: dist/
           if-no-files-found: error
 
-      - name: Report artifact ID for deploy
-        run: |
-          {
-            echo "## Deploy to GitHub Pages"
-            echo ""
-            echo "Copy **artifact_id** into the Deploy workflow (not the workflow run ID from the page URL)."
-            echo ""
-            echo "| Field | Value |"
-            echo "|-------|-------|"
-            echo "| **artifact_id** | \`${{ steps.upload-dist.outputs.artifact-id }}\` |"
-            echo "| **artifact_url** | [open artifact](${{ steps.upload-dist.outputs.artifact-url }}) |"
-            echo ""
-            echo "Do **not** use the number in \`/actions/runs/<id>/\` — that is the CI **run** ID. Use the ID above or the segment after \`/artifacts/\` in the artifact URL."
-          } >> "$GITHUB_STEP_SUMMARY"
-
       - name: Type check
         run: npm run type-check
 
       - name: Test
         run: npm run test-coverage
+
+  lighthouse:
+    name: Lighthouse CI
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: package.json
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: "@trevelint"
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: product-dist
+          path: dist/
+
+      - name: Audit with Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+          runs: 1
