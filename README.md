@@ -34,7 +34,6 @@ Exposes `./Product` → `src/components/product-container.tsx` as `product/Produ
 | Job | What runs |
 |-----|-----------|
 | **Build and Quality** | lint → build (`VITE_BASE=/mba-mfe-product/`) → artifact report → upload `product-dist` → type-check → test-coverage |
-| **Lighthouse CI** | `needs: build` → download `product-dist` → standalone preview at `/mba-mfe-product/` |
 
 ## Release
 
